@@ -3,6 +3,7 @@ from time import sleep
 import random  
 import os
 
+
 @dataclass
 class Characters:
     char_type: str
