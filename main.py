@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from time import sleep
 import random  
-import os
 
 @dataclass
 class Characters:
@@ -22,48 +21,21 @@ class Enemies:
 
 items = ["Sandwich", "Cloak", "Bomb"]
 
-def find_highest_score(files):
-    highest_score = -1
-    highest_scoring_class = None
-
-    for file in files:
-        try:
-            with open(file, 'r') as f:
-                class_name = f.readline().strip()
-                score = int(f.readline().strip())
-                if score > highest_score:
-                    highest_score = score
-                    highest_scoring_class = class_name
-        except FileNotFoundError:
-            continue
-
-    return highest_scoring_class, highest_score
-
 def game_start():
-        print("Greetings weary traveler, come rest by the fire and I will tell you a story.")
-        files = ["Knight's-Story.txt", "Archer's-Story.txt", "Wizard's-Story.txt"]
-        existing_files = [file for file in files if os.path.exists(file)]
-        highest_scoring_class, highest_score = find_highest_score(files)
-        if not existing_files:
-            print("I have no old tales to tell, perhaps you would like to start a new one?")
-
-        elif highest_score == 0:
-            pass
-        elif highest_scoring_class:
-            print(f"Would you like to hear about the {highest_scoring_class}, who has slain {highest_score} enemies?\nOr maybe you want to hear the tale of another hero? ")
-        files = ["Knight's-Story.txt", "Archer's-Story.txt", "Wizard's-Story.txt"]
+    print("Greetings weary traveler, come rest by the fire and I will tell you a story.")
+    while True:
         choice = input("What would you like to hear?\n >New Story\n >Continue Story\n >Leave\n >").capitalize()
         if choice == "New" or choice == "New story" or choice == "New Story":
             return "New"
-        elif choice == "Continue" or "C":
+        elif choice == "Continue" or choice == "C":
             character = input("Who's story should I continue?\n >Knight\n >Wizard\n >Archer\n >").capitalize()
             story = game_continue(character)   
             return story
         elif choice == "Leave":
             quit()
         else:
+            #Keep this in mind ↓↓↓
             print("Placeholder for in-character comment")
-            choice = input("What would you like to hear?\n >New Story\n >Continue Story\n >Leave\n >").capitalize()
 
 def game_continue(character):
     while True:
@@ -111,25 +83,11 @@ def game_continue(character):
 def character_validator():
     name = input("Who's story should I tell?\n >Knight\n >Wizard\n >Archer\n >").capitalize()
     while True:
-        # try:
-        #     with open(f"Knight's-Story.txt", 'r') as file:
-        #         reading = file.readlines()
-        #         story = reading[0]
-        #         print(name.strip())
-        #         print(story.strip())
-        #     if story == name:
-        #         confirm = input("There is already a story for this character. Begin another?\n >Yes\n >No").capitalize()
-        #         if confirm == "No":
-        #             confirm2 = input(f"Would you like to hear the {name}'s story were we left off?\n Yes")
-        #             if confirm2 == "Yes":
-        #                 game_continue(name)
-        # except FileNotFoundError:
-        #     print("It no work :(")
         classes = ["Knight", "Wizard", "Archer"]
         if name in classes:
             return name
         else:
-            print("Not a valid choice. Your choices are Knight, Wizard, and Archer.")
+            print("Not a valid choice. You're choices are Knight, Wizard, and Archer.")
             name = input("> ")
     
 def player_fill(name):
@@ -435,10 +393,6 @@ def heal_spell():
         Characters.char_maxhp = Characters.char_maxhp + 10
         if Characters.char_maxhp > 45:
             Characters.char_maxhp = 45
-    if Characters.char_maxhp < 45:
-        Characters.char_maxhp = Characters.char_maxhp + 15
-        if Characters.char_maxhp > 45:
-            Characters.char_maxhp = 45
     else:
         print("Health is full. Congratulations, you wasted your turn.")
     return
@@ -486,7 +440,7 @@ def boss_battle():
     elif boss_var == 2:
         boss = "Logan"
     print(f"{boss} attacks")
-    sleep(2)
+    sleep(1)
     enemy_fill_boss(boss)
     print(f"You encounter {boss} in the Void")
     sleep(.3)
@@ -496,12 +450,6 @@ def boss_battle():
     boss_count = 2
     while True:
         while boss_count != 0:
-            if Characters.char_type == "Knight":
-                Characters.char_def = 7
-            elif Characters.char_type == "Wizard":
-                Characters.char_def = 5
-            elif Characters.char_type == "Archer":
-                Characters.char_def = 4
             while DOT != 0:
                 dot_effect()
                 DOT -= 1
@@ -531,6 +479,7 @@ def boss_battle():
                 boss_count -= 1
                 break
             elif move == "Defend":
+                Characters.char_def -= 2
                 player_turn = player_defend()
                 sleep(.3)
                 boss_count -= 1
@@ -557,31 +506,23 @@ def boss_battle():
                     move = input(f"What can you do? Your ability is {status}\n>Attack\n>Defend\n>Ability\n>").capitalize()
                     sleep(.3)
         else:
-            boss_turn()
+            weak = boss_turn()
             boss_count = 2
         if Enemies.enm_maxhp <= 0:
             player_victory()
-            while True:
-                finale = input("Continue?\n >Yes\n >No\n >").capitalize
-                if finale == "Yes":
-                    return
-                elif finale == "No":
-                    quit()
-                else:
-                    print("Try again.")
         elif Characters.char_maxhp <= 0:
             print("You succumb to the darkness")
             quit()
 
 def boss_turn():
-    move = random.randint(1,2)
+    move = random.randint(1,3)
     if move == 1:
-        boss_attack()
+        choice = boss_attack()
     elif move == 2:
-        boss_fear()
+        choice = boss_fear()
     elif move == 3:
-        boss_spec()
-    return
+        choice = boss_spec()
+    return choice
 
 def boss_attack():
     miss = dodge_chance_player()
@@ -604,9 +545,9 @@ def boss_fear():
     sleep(.5)
     print("Your defense and evasiveness fell.")
     sleep(1)
-    Characters.char_def -= 3
+    fear = Characters.char_def - 3
     Characters.char_spd = 0
-    return
+    return fear
 
 def boss_spec():
     var = random.randint(1,3)
@@ -615,7 +556,7 @@ def boss_spec():
         sleep(.5)
         print("You feel empty")
         sleep(1)
-        Characters.char_maxhp /= 2
+        Characters.char_maxhp //= 2
         return
     else:
         print("You were spared.")
@@ -636,8 +577,13 @@ def player_victory():
     except FileNotFoundError:
         with open("Game-Victors.txt", 'w') as file:
             file.write(f"{choice} has completed the game!")
-    return
-    
+    finale = input("Continue the loop?\n >Yes\n >No\n >").capitalize
+    if finale == "Yes":
+        main()
+    elif finale == "No":
+        quit()
+    else:
+        main()
 
 def main():
     save = game_start()
