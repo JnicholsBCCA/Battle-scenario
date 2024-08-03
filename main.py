@@ -689,7 +689,6 @@ def main():
             if Enemies.enm_maxhp <= 0:
                 print("YOU WIN!")
                 player_score += 1
-                print(f"Your score is now {player_score}")
                 break
             print(f"{Enemies.enm_type} has {Enemies.enm_maxhp} health")
             sleep(.3)
