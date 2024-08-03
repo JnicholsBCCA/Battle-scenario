@@ -105,19 +105,19 @@ def character_validator():
     
 def player_fill(name):
     if name == "Knight":
-        Characters.char_maxhp = 50
-        Characters.char_atk = 5
-        Characters.char_def = 5
+        Characters.char_maxhp = 60
+        Characters.char_atk = 10
+        Characters.char_def = 7
         Characters.char_spd = 1
     elif name == "Wizard":
-        Characters.char_maxhp = 50
-        Characters.char_atk = 9
-        Characters.char_def = 1
+        Characters.char_maxhp = 45
+        Characters.char_atk = 14
+        Characters.char_def = 5
         Characters.char_spd = 2
     elif name == "Archer":
         Characters.char_maxhp = 50
-        Characters.char_atk = 7
-        Characters.char_def = 3
+        Characters.char_atk = 11
+        Characters.char_def = 4
         Characters.char_spd = 3
     return
 
@@ -152,19 +152,19 @@ def enemy_roll():
 
 def enemy_fill(name):
     if name == "goblin":
-        Enemies.enm_maxhp = 50
-        Enemies.enm_atk = 9
-        Enemies.enm_def = 1
+        Enemies.enm_maxhp = 40
+        Enemies.enm_atk = 13
+        Enemies.enm_def = 4
         Enemies.enm_spd = 2
     elif name == "undead":
-        Enemies.enm_maxhp = 50
-        Enemies.enm_atk = 5
-        Enemies.enm_def = 5
+        Enemies.enm_maxhp = 60
+        Enemies.enm_atk = 9
+        Enemies.enm_def = 6
         Enemies.enm_spd = 1
     elif name == "bandit":
-        Enemies.enm_maxhp = 50
-        Enemies.enm_atk = 7
-        Enemies.enm_def = 3
+        Enemies.enm_maxhp = 45
+        Enemies.enm_atk = 11
+        Enemies.enm_def = 5
         Enemies.enm_spd = 3
     return
 
@@ -372,6 +372,32 @@ def player_ability(attack, counter):
                 sleep(.3)
                 heal_spell()
                 return
+            else:
+                print("Not an option")
+                sleep(.3)
+                choice = input("Which ability would you like to use?\n >1 (Fireball)\n >2 (Heal Spell)\n >")
+    elif Characters.char_type == "Archer":
+        while True:
+            choice = input("Which ability would you like to use?\n >1 (Burning Arrow)\n >2 (Dodge)\n >")
+            if choice == "1":
+                print("You launch a flaming arrow")
+                sleep(.3)
+                atk_def_player(attack)
+                DOT_fire()
+                DOT = "DOT"
+                return DOT
+            if choice == "2":
+                print("You begin to evade!")
+                sleep(.3)
+                dodge_ability()
+                return
+            else:
+                print("Not an option")
+                sleep(.3)
+                choice = input("Which ability would you like to use?\n >1 (Burning Arrow)\n >2 (Dodge)\n >")
+                
+
+                print()
 
 def ability_shield():
     Enemies.enm_maxhp -= 3
@@ -417,6 +443,14 @@ def dot_effect():
     var = random.randint(1,3)
     Enemies.enm_maxhp = Enemies.enm_maxhp - var
     print(f"The {Enemies.enm_type} took {var} damage from burn")
+    sleep(.3)
+    return
+
+def dodge_ability():
+    var = random.randint(1, 2)
+    Characters.char_spd = Characters.char_spd + var
+    print("You are very evasive!")
+    DODGE = 3
     sleep(.3)
     return
 
@@ -468,6 +502,7 @@ def main():
         counter = 2
         enemy_counter = 2
         DOT = 0
+        DODGE = 0
         while Enemies.enm_maxhp > 0 or Characters.char_maxhp > 0:
             while DOT != 0:
                 dot_effect()
@@ -478,6 +513,10 @@ def main():
                 player_score += 1
                 print(f"Your score is now {player_score}")
                 break
+            while DODGE != 0:
+                DODGE -= 1
+                break
+
             print(f"{Enemies.enm_type} has {Enemies.enm_maxhp} health")
             sleep(.3)
             print(f"You have {Characters.char_maxhp} health")
