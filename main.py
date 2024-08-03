@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from time import sleep
 import random  
+import os
 
 @dataclass
 class Characters:
@@ -21,21 +22,49 @@ class Enemies:
 
 items = ["Sandwich", "Cloak", "Bomb"]
 
+def find_highest_score(files):
+    highest_score = -1
+    highest_scoring_class = None
+
+    for file in files:
+        try:
+            with open(file, 'r') as f:
+                class_name = f.readline().strip()
+                score = int(f.readline().strip())
+                if score > highest_score:
+                    highest_score = score
+                    highest_scoring_class = class_name
+        except FileNotFoundError:
+            continue
+
+    return highest_scoring_class, highest_score
+
 def game_start():
-    print("Greetings weary traveler, come rest by the fire and I will tell you a story.")
-    while True:
-        choice = input("What would you like to hear?\n >New Story\n >Continue Story\n >Leave\n >").capitalize()
-        if choice == "New" or choice == "New story" or choice == "New Story":
+        print("Greetings weary traveler, come rest by the fire and I will tell you a story.")
+        files = ["Knight's-Story.txt", "Archer's-Story.txt", "Wizard's-Story.txt"]
+        existing_files = [file for file in files if os.path.exists(file)]
+        highest_scoring_class, highest_score = find_highest_score(files)
+        if not existing_files:
+            print("I have no old tales to tell, perhaps you would like to start a new one?")
+
+        elif highest_score == 0:
+            pass
+        elif highest_scoring_class:
+            print(f"Would you like to hear about the {highest_scoring_class}, who has slain {highest_score} enemies?\nOr maybe you want to hear the tale of another hero? ")
+        files = ["Knight's-Story.txt", "Archer's-Story.txt", "Wizard's-Story.txt"]
+        while True:
+         choice = input("What would you like to hear?\n >New Story\n >Continue Story\n >Leave\n >").capitalize()
+         if choice in ["N", "New", "New Story"]:
             return "New"
-        elif choice == "Continue" or choice == "C":
+         elif choice in ["Continue", "Continue Story", "C"]:
             character = input("Who's story should I continue?\n >Knight\n >Wizard\n >Archer\n >").capitalize()
             story = game_continue(character)   
             return story
-        elif choice == "Leave":
+         elif choice in ["Leave", "L", "Quit", "Q"]:
             quit()
-        else:
-            #Keep this in mind ↓↓↓
-            print("Placeholder for in-character comment")
+         else:
+            print("I didn't quite catch that...why don't you try again? ")
+
 
 def game_continue(character):
     while True:
@@ -107,7 +136,6 @@ def player_fill(name):
         Characters.char_def = 4
         Characters.char_spd = 3
     return
-
 
 def base_camp():
     choice = input("You are resting from your journey.\n What will you do?\n >Relax\n >Explore\n >Sleep (Save and Quit)\n >").capitalize()
@@ -298,7 +326,13 @@ def dodge_chance_player():
         return True
     else:
         return False
-
+def dodge_ability():
+    var = random.randint(1, 2)
+    Characters.char_spd = Characters.char_spd + var
+    print("You are very evasive!")
+    DODGE = 3
+    sleep(.3)
+    return
 
 def dodge_chance_enemy():
     speed = Enemies.enm_spd
@@ -375,6 +409,25 @@ def player_ability(attack, counter):
                 sleep(.3)
                 heal_spell()
                 return
+    elif Characters.char_type == "Archer":
+        while True:
+            choice = input("Which ability would you like to use?\n >1 (Burning Arrow)\n >2 (Dodge)\n >")
+            if choice == "1":
+                print("You launch a flaming arrow")
+                sleep(.3)
+                atk_def_player(attack)
+                DOT_fire()
+                DOT = "DOT"
+                return DOT
+            if choice == "2":
+                print("You begin to evade!")
+                sleep(.3)
+                dodge_ability()
+                return
+            else:
+                print("Not an option")
+                sleep(.3)
+                choice = input("Which ability would you like to use?\n >1 (Burning Arrow)\n >2 (Dodge)\n >")
 
 def ability_shield():
     Enemies.enm_maxhp -= 3
@@ -447,6 +500,7 @@ def boss_battle():
     counter = 2
     enemy_counter = 2
     DOT = 0
+    DODGE = 0
     boss_count = 2
     while True:
         while boss_count != 0:
@@ -639,6 +693,7 @@ def main():
             print(f"{Enemies.enm_type} has {Enemies.enm_maxhp} health")
             sleep(.3)
             print(f"You have {Characters.char_maxhp} health")
+            
             sleep(.3)
             counter -= 1
             enemy_counter -= 1
