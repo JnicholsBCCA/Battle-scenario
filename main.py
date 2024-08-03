@@ -21,20 +21,46 @@ class Enemies:
 
 items = ["Sandwich", "Cloak", "Bomb"]
 
-def game_start():
-    print("Greetings weary traveler, come rest by the fire and I will tell you a story.")
-    choice = input("What would you like to hear?\n >New Story\n >Continue Story\n >Leave\n >").capitalize()
-    if choice == "New" or choice == "New story" or choice == "New Story":
-        return "New"
-    elif choice == "Continue" or "C":
-        character = input("Who's story should I continue?\n >Knight\n >Wizard\n >Archer\n >").capitalize()
-        story = game_continue(character)   
-        return story
-    elif choice == "Leave":
-        quit()
-    else:
-        print("Placeholder for in-character comment")
+def find_highest_score(files):
+    highest_score = -1
+    highest_scoring_class = None
+
+    for file in files:
+        try:
+            with open(file, 'r') as f:
+                class_name = f.readline().strip()
+                score = int(f.readline().strip())
+                if score > highest_score:
+                    highest_score = score
+                    highest_scoring_class = class_name
+        except Exception as e:
+            print(f"Error reading {file}: {e}")
+
+    return highest_scoring_class, highest_score
+
+    def game_start():
+        print("Greetings weary traveler, come rest by the fire and I will tell you a story.")
+        files = ["Knight's-Story.txt", "Archer's-Story.txt", "Wizard's-Story.txt"]
+        highest_scoring_class, highest_score = find_highest_score(files)
+        if highest_score == 0:
+            pass
+        elif highest_scoring_class:
+            print(f"Would you like to hear about the {highest_scoring_class}, who has slain {highest_score} enemies?\nOr maybe you want to hear the tale of another hero? ")
+        else:
+            print("I have no old tales to tell, perhaps you would like to start a new one?")
+        files = ["Knight's-Story.txt", "Archer's-Story.txt", "Wizard's-Story.txt"]
         choice = input("What would you like to hear?\n >New Story\n >Continue Story\n >Leave\n >").capitalize()
+        if choice == "New" or choice == "New story" or choice == "New Story":
+            return "New"
+        elif choice == "Continue" or "C":
+            character = input("Who's story should I continue?\n >Knight\n >Wizard\n >Archer\n >").capitalize()
+            story = game_continue(character)   
+            return story
+        elif choice == "Leave":
+            quit()
+        else:
+            print("Placeholder for in-character comment")
+            choice = input("What would you like to hear?\n >New Story\n >Continue Story\n >Leave\n >").capitalize()
 
 def game_continue(character):
     while True:
@@ -100,7 +126,7 @@ def character_validator():
         if name in classes:
             return name
         else:
-            print("Not a valid choice. You're choices are Knight, Wizard, and Archer.")
+            print("Not a valid choice. Your choices are Knight, Wizard, and Archer.")
             name = input("> ")
     
 def player_fill(name):
@@ -412,10 +438,10 @@ def DOT_fire():
     return
 
 def heal_spell():
-    if Characters.char_maxhp < 50:
+    if Characters.char_maxhp < 45:
         Characters.char_maxhp = Characters.char_maxhp + 15
-        if Characters.char_maxhp > 50:
-            Characters.char_maxhp = 50
+        if Characters.char_maxhp > 45:
+            Characters.char_maxhp = 45
     else:
         print("Health is full. Congratulations, you wasted your turn.")
     return
