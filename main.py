@@ -23,18 +23,19 @@ items = ["Sandwich", "Cloak", "Bomb"]
 
 def game_start():
     print("Greetings weary traveler, come rest by the fire and I will tell you a story.")
-    choice = input("What would you like to hear?\n >New Story\n >Continue Story\n >Leave\n >").capitalize()
-    if choice == "New" or choice == "New story" or choice == "New Story":
-        return "New"
-    elif choice == "Continue" or "C":
-        character = input("Who's story should I continue?\n >Knight\n >Wizard\n >Archer\n >").capitalize()
-        story = game_continue(character)   
-        return story
-    elif choice == "Leave":
-        quit()
-    else:
-        print("Placeholder for in-character comment")
+    while True:
         choice = input("What would you like to hear?\n >New Story\n >Continue Story\n >Leave\n >").capitalize()
+        if choice == "New" or choice == "New story" or choice == "New Story":
+            return "New"
+        elif choice == "Continue" or choice == "C":
+            character = input("Who's story should I continue?\n >Knight\n >Wizard\n >Archer\n >").capitalize()
+            story = game_continue(character)   
+            return story
+        elif choice == "Leave":
+            quit()
+        else:
+            #Keep this in mind ↓↓↓
+            print("Placeholder for in-character comment")
 
 def game_continue(character):
     while True:
@@ -135,7 +136,13 @@ def save_and_quit(score):
         file.write(f"\n{score}")
     quit()
 def hp_restore():
-    Characters.char_maxhp = 50
+    if Characters.char_type == "Knight":
+        Characters.char_maxhp = 60
+    elif Characters.char_type == "Wizard":
+        Characters.char_maxhp = 45
+    elif Characters.char_type == "Archer":
+        Characters.char_maxhp = 50
+
     return
 
 def enemy_roll():
@@ -157,15 +164,23 @@ def enemy_fill(name):
         Enemies.enm_def = 4
         Enemies.enm_spd = 2
     elif name == "undead":
-        Enemies.enm_maxhp = 60
+        Enemies.enm_maxhp = 50
         Enemies.enm_atk = 9
         Enemies.enm_def = 6
         Enemies.enm_spd = 1
     elif name == "bandit":
-        Enemies.enm_maxhp = 45
+        Enemies.enm_maxhp = 50
         Enemies.enm_atk = 11
         Enemies.enm_def = 5
         Enemies.enm_spd = 3
+    return
+
+def enemy_fill_boss(boss):
+    Enemies.enm_type = boss
+    Enemies.enm_maxhp = 100
+    Enemies.enm_atk = 15
+    Enemies.enm_def = Characters.char_atk - 5
+    Enemies.enm_spd = 7
     return
 
 
@@ -264,15 +279,17 @@ def enemy_move(attack, counter):
         if move == 2 and counter <= 0:
             print(f"The {Enemies.enm_type} uses their ability")
             enemy_ability(attack, counter)
-            return
+            counter = 3
+            return counter
         else:
             move = random.randint(0,1)
     
+
 def atk_def_player(attack):
     miss = dodge_chance_enemy()
     if miss == True:
         return
-    var = random.randint(-5, 5)
+    var = random.randint(-2, 5)
     damage = attack + var - Enemies.enm_def
     if damage <= 0:
         print("You did 0 damage")
@@ -302,7 +319,7 @@ def dodge_chance_enemy():
     var = random.randint(1, 20)
     if speed >= var:
         sleep(.3)
-        print(f"The {Enemies.enm_type} dodges")
+        print(f"{Enemies.enm_type} dodges")
         sleep(.3)
         return True
     else:
@@ -312,7 +329,7 @@ def atk_def_enemy(attack):
     miss = dodge_chance_player()
     if miss == True:
         return
-    var = random.randint(-5, 5)
+    var = random.randint(-2, 3)
     damage = attack + var - Characters.char_def
     if damage <= 0:
         print("You took 0 damage")
@@ -372,32 +389,6 @@ def player_ability(attack, counter):
                 sleep(.3)
                 heal_spell()
                 return
-            else:
-                print("Not an option")
-                sleep(.3)
-                choice = input("Which ability would you like to use?\n >1 (Fireball)\n >2 (Heal Spell)\n >")
-    elif Characters.char_type == "Archer":
-        while True:
-            choice = input("Which ability would you like to use?\n >1 (Burning Arrow)\n >2 (Dodge)\n >")
-            if choice == "1":
-                print("You launch a flaming arrow")
-                sleep(.3)
-                atk_def_player(attack)
-                DOT_fire()
-                DOT = "DOT"
-                return DOT
-            if choice == "2":
-                print("You begin to evade!")
-                sleep(.3)
-                dodge_ability()
-                return
-            else:
-                print("Not an option")
-                sleep(.3)
-                choice = input("Which ability would you like to use?\n >1 (Burning Arrow)\n >2 (Dodge)\n >")
-                
-
-                print()
 
 def ability_shield():
     Enemies.enm_maxhp -= 3
@@ -412,10 +403,10 @@ def DOT_fire():
     return
 
 def heal_spell():
-    if Characters.char_maxhp < 50:
-        Characters.char_maxhp = Characters.char_maxhp + 15
-        if Characters.char_maxhp > 50:
-            Characters.char_maxhp = 50
+    if Characters.char_maxhp < 45:
+        Characters.char_maxhp = Characters.char_maxhp + 10
+        if Characters.char_maxhp > 45:
+            Characters.char_maxhp = 45
     else:
         print("Health is full. Congratulations, you wasted your turn.")
     return
@@ -442,15 +433,7 @@ def enemy_ability(attack, counter):
 def dot_effect():
     var = random.randint(1,3)
     Enemies.enm_maxhp = Enemies.enm_maxhp - var
-    print(f"The {Enemies.enm_type} took {var} damage from burn")
-    sleep(.3)
-    return
-
-def dodge_ability():
-    var = random.randint(1, 2)
-    Characters.char_spd = Characters.char_spd + var
-    print("You are very evasive!")
-    DODGE = 3
+    print(f"{Enemies.enm_type} took {var} damage from burn")
     sleep(.3)
     return
 
@@ -464,8 +447,165 @@ def boss_battle():
     print("You try to remember what they look like.")
     sleep(5)
     print(f"There is no {Characters.char_type}.")
-    sleep(10)
-    print("Trey attacks")
+    sleep(8)
+    boss_var = random.randint(1,2)
+    if boss_var == 1:
+        boss = "Trey"
+    elif boss_var == 2:
+        boss = "Logan"
+    print(f"{boss} attacks")
+    sleep(2)
+    enemy_fill_boss(boss)
+    print(f"You encounter {boss} in the Void")
+    sleep(.3)
+    counter = 2
+    enemy_counter = 2
+    DOT = 0
+    boss_count = 2
+    while True:
+        while boss_count != 0:
+            if Characters.char_type == "Knight":
+                Characters.char_def = 7
+            elif Characters.char_type == "Wizard":
+                Characters.char_def = 5
+            elif Characters.char_type == "Archer":
+                Characters.char_def = 4
+            while DOT != 0:
+                dot_effect()
+                DOT -= 1
+                break
+            if Enemies.enm_maxhp <= 0:
+                player_victory()
+                break
+            print(f"{Enemies.enm_type} has {Enemies.enm_maxhp} health")
+            sleep(.3)
+            print(f"You have {Characters.char_maxhp} health")
+            sleep(.3)
+            counter -= 1
+            enemy_counter -= 1
+            if counter <= 0:
+                Characters.char_ability = True
+            else:
+                Characters.char_ability = False
+            if Characters.char_ability == True:
+                status = "ready"
+            else:
+                status = "not ready"
+            move = input(f"What can you do? Your ability is {status}\n>Attack\n>Defend\n>Ability\n>").capitalize()
+            sleep(.3)
+            if move == "Attack":
+                player_turn = atk_def_player(Characters.char_atk)
+                sleep(.3)
+                boss_count -= 1
+                break
+            elif move == "Defend":
+                player_turn = player_defend()
+                sleep(.3)
+                boss_count -= 1
+                break
+            elif move == "Ability":
+                if Characters.char_ability == True:
+                    player_turn = player_ability(Characters.char_atk, counter)
+                    sleep(.3)
+                    if player_turn == "Stunned":
+                        counter = 3
+                        boss_count -= 1
+                        break
+                    elif player_turn == "DOT":
+                        DOT = 3
+                        counter = 3
+                        boss_count -= 1
+                        break
+                    else:
+                        counter = 3
+                        boss_count -= 1
+                        break
+                else:
+                    print(f"Ability not ready. Ability will be ready in {counter} turn(s).")
+                    move = input(f"What can you do? Your ability is {status}\n>Attack\n>Defend\n>Ability\n>").capitalize()
+                    sleep(.3)
+        else:
+            boss_turn()
+            boss_count = 2
+        if Enemies.enm_maxhp <= 0:
+            player_victory()
+            while True:
+                finale = input("Continue?\n >Yes\n >No\n >").capitalize
+                if finale == "Yes":
+                    return
+                elif finale == "No":
+                    quit()
+                else:
+                    print("Try again.")
+        elif Characters.char_maxhp <= 0:
+            print("You succumb to the darkness")
+            quit()
+
+def boss_turn():
+    move = random.randint(1,2)
+    if move == 1:
+        boss_attack()
+    elif move == 2:
+        boss_fear()
+    elif move == 3:
+        boss_spec()
+    return
+
+def boss_attack():
+    miss = dodge_chance_player()
+    if miss == True:
+        return
+    var = random.randint(0, 3)
+    print(f"The presence of {Enemies.enm_type} is overwhelming.")
+    sleep(.5)
+    print("You don't want to feel anymore")
+    sleep(1)
+    psycho_damage = Enemies.enm_atk + var
+    pain = psycho_damage - Characters.char_def
+    health = Characters.char_maxhp - pain
+    Characters.char_maxhp = health
+    return
+    
+
+def boss_fear():
+    print(f"You try to comprehend {Enemies.enm_type}.")
+    sleep(.5)
+    print("Your defense and evasiveness fell.")
+    sleep(1)
+    Characters.char_def -= 3
+    Characters.char_spd = 0
+    return
+
+def boss_spec():
+    var = random.randint(1,3)
+    if var != 1:
+        print(f"{Enemies.enm_type} consumes your spirit.")
+        sleep(.5)
+        print("You feel empty")
+        sleep(1)
+        Characters.char_maxhp /= 2
+        return
+    else:
+        print("You were spared.")
+        return
+        
+
+    
+def player_victory():
+    print("You break the loop")
+    sleep(5)
+    print("Despite everything, you feel happy")
+    sleep(5)
+    print("YOU WIN!!!")
+    choice = input("Enter your name for the records!\n >")
+    try:
+        with open("Game-Victors.txt", 'a') as file:
+            file.write(f"\n{choice} has completed the game!")
+    except FileNotFoundError:
+        with open("Game-Victors.txt", 'w') as file:
+            file.write(f"{choice} has completed the game!")
+    return
+    
 
 def main():
     save = game_start()
@@ -478,7 +618,7 @@ def main():
         player_char = character_validator()
         Characters.char_type = player_char
         player_fill(player_char)
-    while player_score < 10:
+    while player_score != 10:
         while True:
             home = base_camp()
             if home == "Relax":
@@ -502,8 +642,13 @@ def main():
         counter = 2
         enemy_counter = 2
         DOT = 0
-        DODGE = 0
         while Enemies.enm_maxhp > 0 or Characters.char_maxhp > 0:
+            if Characters.char_type == "Knight":
+                Characters.char_def = 7
+            elif Characters.char_type == "Wizard":
+                Characters.char_def = 5
+            elif Characters.char_type == "Archer":
+                Characters.char_def = 4
             while DOT != 0:
                 dot_effect()
                 DOT -= 1
@@ -513,10 +658,6 @@ def main():
                 player_score += 1
                 print(f"Your score is now {player_score}")
                 break
-            while DODGE != 0:
-                DODGE -= 1
-                break
-
             print(f"{Enemies.enm_type} has {Enemies.enm_maxhp} health")
             sleep(.3)
             print(f"You have {Characters.char_maxhp} health")
@@ -538,12 +679,16 @@ def main():
                     player_turn = atk_def_player(player_attack)
                     sleep(.3)
                     enemy_turn = enemy_move(enemy_attack, enemy_counter)
+                    if enemy_turn == 3:
+                        enemy_counter = 3
                     sleep(.3)
                     break
                 elif move == "Defend":
                     player_turn = player_defend()
                     sleep(.3)
                     enemy_turn = enemy_move(enemy_attack, enemy_counter)
+                    if enemy_turn == 3:
+                        enemy_counter = 3
                     sleep(.3)
                     break
                 elif move == "Ability":
@@ -555,16 +700,20 @@ def main():
                         elif player_turn == "DOT":
                             DOT = 3
                             enemy_turn = enemy_move(enemy_attack, enemy_counter)
+                            if enemy_turn == 3:
+                                enemy_counter = 3
                             sleep(.3)
                             counter = 3
                             break
                         else:
                             enemy_turn = enemy_move(enemy_attack, enemy_counter)
+                            if enemy_turn == 3:
+                                enemy_counter = 3
                             sleep(.3)
                             counter = 3
                             break
                     else:
-                        print(f"Ability not ready. Ability will be ready in {counter} turns.")
+                        print(f"Ability not ready. Ability will be ready in {counter} turn(s).")
                         move = input(f"What will you do? Your ability is {status}\n>Attack\n>Defend\n>Ability\n>").capitalize()
                         sleep(.3)
                 # ONLY IF WANTED NOT NECESSARY
@@ -589,15 +738,18 @@ def main():
                     save_and_quit(player_score)
                 quit()
     else:
+        hp_restore()
         print("You arrive at the castle...")
         helpless = True
         while helpless == True:
-            hopeless = input("You want to leave.\n >Proceed\n >Leave\n >")
+            hopeless = input("You want to leave.\n >Proceed\n >Leave\n >").capitalize()
             if hopeless == "Leave":
                 print("You can't")
             else:
                 print("You proceed")
                 boss_battle()
+                player_score += 1
+                
 
 
 if __name__ == "__main__":
